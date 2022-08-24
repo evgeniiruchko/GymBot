@@ -8,6 +8,7 @@ public enum ButtonNameEnum {
     SECOND_BUTTON("И сюда тоже"),
     THIRD_BUTTON("Кнопка"),
     HELP_BUTTON("Помощь"),
+    START_BUTTON("Добро пожаловать!"),
     AUTH_BUTTON("Авторизоваться по номеру телефона");
 
     private final String buttonName;
