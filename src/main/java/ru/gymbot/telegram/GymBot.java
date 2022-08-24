@@ -17,10 +17,13 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.starter.SpringWebhookBot;
 import ru.gymbot.constans.bot.BotMessageEnum;
+import ru.gymbot.exceptions.NoSuchUserException;
 import ru.gymbot.telegram.handlers.MessageHandler;
+import ru.gymbot.telegram.keyboards.StartKeyboard;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 @Getter
 @Setter
@@ -29,6 +32,7 @@ public class GymBot extends SpringWebhookBot {
     String botPath;
     String botUsername;
     String botToken;
+    static StartKeyboard startKeyboard = new StartKeyboard();
 
     MessageHandler messageHandler;
 
@@ -50,20 +54,28 @@ public class GymBot extends SpringWebhookBot {
         } catch (IllegalArgumentException e) {
             return new SendMessage(update.getMessage().getChatId().toString(),
                     BotMessageEnum.EXCEPTION_ILLEGAL_MESSAGE.getMessage());
+        } catch (NoSuchUserException e) {
+            SendMessage sendMessage = new SendMessage(update.getMessage().getChatId().toString(), e.getMessage());
+            sendMessage.enableMarkdown(true);
+            sendMessage.setReplyMarkup(startKeyboard.getMainMenuKeyboard());
+            return sendMessage;
+        } catch (NoSuchElementException e) {
+            return new SendMessage(update.getMessage().getChatId().toString(),
+                    e.getMessage());
         } catch (Exception e) {
             return new SendMessage(update.getMessage().getChatId().toString(),
                     BotMessageEnum.EXCEPTION_WHAT_THE_FUCK.getMessage());
         }
     }
 
-    private BotApiMethod<?> handleUpdate(Update update) throws IOException {
+    private BotApiMethod<?> handleUpdate(Update update) {
         if (update.hasCallbackQuery()) {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             return null; //callbackQueryHandler.processCallbackQuery(callbackQuery);
         } else {
             Message message = update.getMessage();
             if (message != null) {
-                return null; //messageHandler.answerMessage(update.getMessage());
+                return messageHandler.answerMessage(update.getMessage());
             }
         }
         return null;
