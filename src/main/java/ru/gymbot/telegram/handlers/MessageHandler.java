@@ -3,11 +3,8 @@ package ru.gymbot.telegram.handlers;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.apache.commons.io.FileUtils;
-import org.json.JSONObject;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Contact;
@@ -23,13 +20,6 @@ import ru.gymbot.telegram.GymBot;
 import ru.gymbot.telegram.keyboards.AuthMenuKeyboard;
 import ru.gymbot.telegram.keyboards.UnAuthMenuKeyboard;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.text.MessageFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -59,7 +49,7 @@ public class MessageHandler {
             userService.saveUserInDB(message);
             return getStartMessage(chatId);
         } else if (inputText.equals(ButtonNameEnum.HELP_BUTTON.getButtonName())) {
-            return getStartMessage(chatId);
+            return getHelpMessage(chatId);
         } else if (inputText.equals(ButtonNameEnum.AUTH_BUTTON.getButtonName())) {
             return authorize(chatId, message.getContact());
         } else {
@@ -74,6 +64,16 @@ public class MessageHandler {
      * @return сообщение
      */
     private SendMessage getStartMessage(Long chatId) {
+        return generateSendMessage(chatId, BotMessageEnum.START_MESSAGE.getMessage());
+    }
+
+    /**
+     * Сообщение при нажатии на кнопку "Помощь".
+     *
+     * @param chatId - ИД пользователя
+     * @return сообщение
+     */
+    private SendMessage getHelpMessage(Long chatId) {
         return generateSendMessage(chatId, BotMessageEnum.HELP_MESSAGE.getMessage());
     }
 
