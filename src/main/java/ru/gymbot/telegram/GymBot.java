@@ -68,7 +68,7 @@ public class GymBot extends SpringWebhookBot {
         }
     }
 
-    private BotApiMethod<?> handleUpdate(Update update) {
+    private BotApiMethod<?> handleUpdate(Update update) throws IOException{
         if (update.hasCallbackQuery()) {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             return null; //callbackQueryHandler.processCallbackQuery(callbackQuery);
