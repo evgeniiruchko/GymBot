@@ -10,16 +10,20 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import ru.gymbot.config.Settings;
 import ru.gymbot.constans.bot.BotMessageEnum;
 import ru.gymbot.constans.bot.ButtonNameEnum;
 import ru.gymbot.entities.Client;
+import ru.gymbot.entities.Trainer;
 import ru.gymbot.entities.User;
 import ru.gymbot.services.ClientService;
+import ru.gymbot.services.TrainerService;
 import ru.gymbot.services.UserService;
 import ru.gymbot.telegram.GymBot;
-import ru.gymbot.telegram.keyboards.AuthMenuKeyboard;
-import ru.gymbot.telegram.keyboards.UnAuthMenuKeyboard;
+import ru.gymbot.telegram.keyboards.MenuKeyboard;
 
+import java.io.File;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -28,10 +32,10 @@ import java.util.Optional;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor(onConstructor = @__(@Lazy))
 public class MessageHandler {
-    UnAuthMenuKeyboard unAuthMenuKeyboard;
-    AuthMenuKeyboard authMenuKeyboard;
+    MenuKeyboard menuKeyboard;
     UserService userService;
     ClientService clientService;
+    TrainerService trainerService;
     @Lazy
     GymBot gymBot;
 
@@ -52,6 +56,8 @@ public class MessageHandler {
             return getHelpMessage(chatId);
         } else if (inputText.equals(ButtonNameEnum.AUTH_BUTTON.getButtonName())) {
             return authorize(chatId, message.getContact());
+        } else if (inputText.equals(ButtonNameEnum.GET_TRAINERS.getButtonName())) {
+            return getTrainers(chatId);
         } else {
             return new SendMessage(chatId.toString(), BotMessageEnum.NON_COMMAND_MESSAGE.getMessage());
         }
@@ -75,6 +81,30 @@ public class MessageHandler {
      */
     private SendMessage getHelpMessage(Long chatId) {
         return generateSendMessage(chatId, BotMessageEnum.HELP_MESSAGE.getMessage());
+    }
+
+    /**
+     * Метод возвращает информацию обо всех тренерах. Если есть фото, то отправляет фото с описанием,
+     * если фото нет, то обычный текст. Для каждого тренера отдельное сообщение.
+     * @param chatId ИД пользователя
+     * @return список тренеров
+     */
+    private SendMessage getTrainers(Long chatId) {
+        List<Trainer> trainers = trainerService.findAllTrainers();
+        if (trainers.isEmpty()) {
+            return generateSendMessage(chatId, BotMessageEnum.EXCEPTION_EMPTY_TRAINERS.getMessage());
+        }
+        trainers.forEach(trainer -> {
+            String text = trainer.getFirstName() + "\n\n" +
+                    trainer.getDescription();
+            File file = new File(Settings.PATH_TRAINER_PHOTOS + trainer.getPhoto());
+            if (file.isFile()) {
+                gymBot.sendPhoto(chatId, text, file.getPath());
+            } else {
+                gymBot.sendMessage(chatId, generateSendMessage(chatId, text));
+            }
+        });
+        return new SendMessage();
     }
 
     /**
@@ -108,7 +138,7 @@ public class MessageHandler {
         User user = userService.findUserById(chatId);
         user.setClient(client);
         userService.saveUser(user);
-        return generateSendMessage(chatId, String.format(BotMessageEnum.SUCCEFFUL_AUTHORIZATION.getMessage(), client.getFirstName(), client.getMiddleName()));
+        return generateSendMessage(chatId, String.format(BotMessageEnum.SUCCESSFUL_AUTHORIZATION.getMessage(), client.getFirstName(), client.getMiddleName()));
     }
 
     /**
@@ -120,9 +150,9 @@ public class MessageHandler {
     private ReplyKeyboardMarkup keyboard(Long chatId) {
         User user = userService.findUserById(chatId);
         if (Optional.ofNullable(user.getClient()).isPresent()) {
-            return authMenuKeyboard.getMainMenuKeyboard();
+            return menuKeyboard.getMainMenuKeyboard(true);
         } else {
-            return unAuthMenuKeyboard.getMainMenuKeyboard();
+            return menuKeyboard.getMainMenuKeyboard(false);
         }
     }
 }
