@@ -28,6 +28,7 @@ public class Trainer {
     @Column(name = "middle_name", length = 20)
     private String middleName;
 
+    @NotNull
     @Column(name = "last_name", length = 20)
     private String lastName;
 
