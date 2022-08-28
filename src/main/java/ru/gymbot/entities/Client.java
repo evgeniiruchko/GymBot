@@ -15,7 +15,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class Client {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "phone_number", nullable = false, length = 15)
     private String id;
 
