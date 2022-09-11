@@ -1,9 +1,16 @@
 package ru.gymbot.entities;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.Hibernate;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -18,6 +25,7 @@ public class Client {
     @Column(name = "phone_number", nullable = false, length = 15)
     private String id;
 
+    @NotNull
     @Column(name = "first_name", length = 20)
     private String firstName;
 

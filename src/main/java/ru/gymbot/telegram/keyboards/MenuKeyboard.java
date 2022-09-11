@@ -20,11 +20,15 @@ public class MenuKeyboard {
 
         KeyboardRow row2 = new KeyboardRow();
         row2.add(new KeyboardButton(ButtonNameEnum.GET_TRAINERS.getButtonName()));
-        row2.add(new KeyboardButton(ButtonNameEnum.HELP_BUTTON.getButtonName()));
+        row2.add(new KeyboardButton(ButtonNameEnum.GET_TRAININGS.getButtonName()));
+
+        KeyboardRow row3 = new KeyboardRow();
+        row3.add(new KeyboardButton(ButtonNameEnum.HELP_BUTTON.getButtonName()));
 
         List<KeyboardRow> keyboard = new ArrayList<>();
         if (!auth) keyboard.add(row1);
         keyboard.add(row2);
+        keyboard.add(row3);
 
         final ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setKeyboard(keyboard);

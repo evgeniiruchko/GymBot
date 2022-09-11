@@ -15,9 +15,11 @@ import ru.gymbot.constans.bot.BotMessageEnum;
 import ru.gymbot.constans.bot.ButtonNameEnum;
 import ru.gymbot.entities.Client;
 import ru.gymbot.entities.Trainer;
+import ru.gymbot.entities.Training;
 import ru.gymbot.entities.User;
 import ru.gymbot.services.ClientService;
 import ru.gymbot.services.TrainerService;
+import ru.gymbot.services.TrainingService;
 import ru.gymbot.services.UserService;
 import ru.gymbot.telegram.GymBot;
 import ru.gymbot.telegram.keyboards.MenuKeyboard;
@@ -36,6 +38,7 @@ public class MessageHandler {
     UserService userService;
     ClientService clientService;
     TrainerService trainerService;
+    TrainingService trainingService;
     @Lazy
     GymBot gymBot;
 
@@ -58,6 +61,8 @@ public class MessageHandler {
             return authorize(chatId, message.getContact());
         } else if (inputText.equals(ButtonNameEnum.GET_TRAINERS.getButtonName())) {
             return getTrainers(chatId);
+        } else if (inputText.equals(ButtonNameEnum.GET_TRAININGS.getButtonName())) {
+            return getTrainings(chatId);
         } else {
             return new SendMessage(chatId.toString(), BotMessageEnum.NON_COMMAND_MESSAGE.getMessage());
         }
@@ -98,7 +103,7 @@ public class MessageHandler {
             String text = trainer.getFirstName() + "\n\n" +
                     trainer.getDescription();
             File file = new File(Settings.PATH_TRAINER_PHOTOS + trainer.getPhoto());
-            if (file.isFile()) {
+            if (file.isFile() && text.length() <= Settings.MAX_LENGTH_DESCRIPTION_PHOTO) {
                 gymBot.sendPhoto(chatId, text, file.getPath());
             } else {
                 gymBot.sendMessage(chatId, generateSendMessage(chatId, text));
@@ -106,6 +111,25 @@ public class MessageHandler {
         });
         return new SendMessage();
     }
+
+    private SendMessage getTrainings(Long chatId) {
+        List<Training> trainings = trainingService.findAllGroupTraining();
+        if (trainings.isEmpty()) {
+            return generateSendMessage(chatId, BotMessageEnum.EXCEPTION_EMPTY_TRAININGS.getMessage());
+        }
+        trainings.forEach(training -> {
+            String text = training.getTitle() + "\n\n" +
+                    training.getDescription();
+            File file = new File(Settings.PATH_TRAINING_PHOTOS + training.getPhoto());
+            if (file.isFile() && text.length() <= Settings.MAX_LENGTH_DESCRIPTION_PHOTO) {
+                gymBot.sendPhoto(chatId, text, file.getPath());
+            } else {
+                gymBot.sendMessage(chatId, generateSendMessage(chatId, text));
+            }
+        });
+        return new SendMessage();
+    }
+
 
     /**
      * метод генерирует сообщение и возвращает его и клавиатуру
@@ -138,7 +162,7 @@ public class MessageHandler {
         User user = userService.findUserById(chatId);
         user.setClient(client);
         userService.saveUser(user);
-        return generateSendMessage(chatId, String.format(BotMessageEnum.SUCCESSFUL_AUTHORIZATION.getMessage(), client.getFirstName(), client.getMiddleName()));
+        return generateSendMessage(chatId, String.format(BotMessageEnum.SUCCESSFUL_AUTHORIZATION.getMessage(), client.getFirstName()));
     }
 
     /**
