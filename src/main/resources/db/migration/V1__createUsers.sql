@@ -11,7 +11,7 @@ VALUES
 
 CREATE TABLE clients (
                          phone_number VARCHAR(15) UNIQUE NOT NULL,
-                         first_name VARCHAR(20),
+                         first_name VARCHAR(20) NOT NULL,
                          middle_name VARCHAR(20),
                          last_name VARCHAR(20),
                          birthday DATE,

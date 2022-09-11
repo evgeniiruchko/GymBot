@@ -7,7 +7,8 @@ public enum ButtonNameEnum {
     HELP_BUTTON("Помощь"),
     START_BUTTON("Добро пожаловать!"),
     AUTH_BUTTON("Авторизоваться по номеру телефона"),
-    GET_TRAINERS("Наши тренеры");
+    GET_TRAINERS("Наши тренеры"),
+    GET_TRAININGS("Групповые тренировки");
 
     private final String buttonName;
 
